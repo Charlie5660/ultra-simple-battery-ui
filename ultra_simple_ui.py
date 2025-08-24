@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""
+Ultra Simple Battery UI - Phase 1
+最もシンプルで安全なバッテリー制御UI
+
+Phase 1: 基本ウィンドウ + バッテリー表示のみ
+"""
+
+import tkinter as tk
+import subprocess
+import re
+from datetime import datetime
+
+class UltraSimpleBatteryUI:
+    def __init__(self):
+        """初期化 - 最小限の設定"""
+        # 基本ウィンドウ作成
+        self.root = tk.Tk()
+        self.setup_window()
+        
+        # 状態管理 - 最小限
+        self.battery_level = 0
+        
+        # UI作成
+        self.create_ui()
+        
+        # 初回バッテリー情報取得
+        self.update_battery_display()
+        
+    def setup_window(self):
+        """ウィンドウの基本設定"""
+        self.root.title("🔋 Battery Control")
+        self.root.geometry("300x150")
+        self.root.resizable(False, False)  # サイズ固定でレイアウト問題回避
+        
+        # 画面中央配置
+        self.root.update_idletasks()
+        x = (self.root.winfo_screenwidth() // 2) - 150
+        y = (self.root.winfo_screenheight() // 2) - 75
+        self.root.geometry(f"300x150+{x}+{y}")
+        
+    def create_ui(self):
+        """UI要素作成 - Phase 1: バッテリー表示のみ"""
+        # メインフレーム
+        main_frame = tk.Frame(self.root, padx=20, pady=20)
+        main_frame.pack(fill='both', expand=True)
+        
+        # バッテリー表示ラベル
+        self.battery_label = tk.Label(
+            main_frame,
+            text="🔋 Battery: ---%",
+            font=('Arial', 16, 'bold'),
+            justify='center'
+        )
+        self.battery_label.pack(pady=10)
+        
+        # デバッグ情報表示（開発時のみ）
+        self.debug_label = tk.Label(
+            main_frame,
+            text="Phase 1: Display Only",
+            font=('Arial', 10),
+            fg='gray'
+        )
+        self.debug_label.pack(pady=5)
+        
+    def get_battery_info(self):
+        """バッテリー情報取得 - エラーハンドリング強化"""
+        try:
+            result = subprocess.run(['pmset', '-g', 'batt'], 
+                                  capture_output=True, text=True, timeout=5)
+            
+            if result.returncode != 0:
+                print(f"pmset error: {result.stderr}")
+                return False
+                
+            output = result.stdout.lower()
+            
+            # バッテリーレベル抽出
+            match = re.search(r'(\d+)%', output)
+            if match:
+                self.battery_level = int(match.group(1))
+                return True
+            else:
+                print("Battery level not found in pmset output")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            print("pmset command timeout")
+            return False
+        except Exception as e:
+            print(f"Battery info error: {e}")
+            return False
+            
+    def update_battery_display(self):
+        """バッテリー表示更新"""
+        try:
+            if self.get_battery_info():
+                # 正常取得時
+                self.battery_label.config(text=f"🔋 Battery: {self.battery_level}%")
+                
+                # 色分け（シンプル）
+                if self.battery_level <= 20:
+                    self.battery_label.config(fg='red')
+                elif self.battery_level <= 50:
+                    self.battery_label.config(fg='orange')
+                else:
+                    self.battery_label.config(fg='green')
+            else:
+                # エラー時の表示
+                self.battery_label.config(text="🔋 Battery: Error", fg='gray')
+                
+        except Exception as e:
+            print(f"Display update error: {e}")
+            self.battery_label.config(text="🔋 Battery: Error", fg='gray')
+            
+    def run(self):
+        """アプリケーション実行"""
+        try:
+            print("🔋 Ultra Simple Battery UI - Phase 1 起動")
+            print("Phase 1: バッテリー表示のみ")
+            
+            # 終了処理設定
+            self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+            
+            # メインループ開始
+            self.root.mainloop()
+            
+        except Exception as e:
+            print(f"Application error: {e}")
+            
+    def on_closing(self):
+        """終了処理"""
+        print("🔋 Ultra Simple Battery UI 終了")
+        self.root.quit()
+        self.root.destroy()
+
+def main():
+    """メイン関数"""
+    try:
+        app = UltraSimpleBatteryUI()
+        app.run()
+    except Exception as e:
+        print(f"Main error: {e}")
+        import traceback
+        traceback.print_exc()
+
+if __name__ == "__main__":
+    main()

@@ -2,12 +2,12 @@
 cd "/Users/yamakawadaiki/battery_charge_app"
 
 # 既存のBattery Controlが実行中かチェック
-if pgrep -f "simple_battery_app.py" > /dev/null; then
-    echo "🔋 Battery Control is already running!"
+if pgrep -f "ultra_simple_ui.py" > /dev/null; then
+    echo "🔋 Ultra Simple Battery Control is already running!"
     # 既に実行中の場合は、ウィンドウをアクティブにする
     osascript -e 'tell application "Python" to activate' 2>/dev/null || true
     exit 0
 fi
 
-# 新しいシンプルバッテリーアプリを起動
-exec python3 simple_battery_app.py
+# Ultra Simple Battery UI を起動
+exec python3 ultra_simple_ui.py

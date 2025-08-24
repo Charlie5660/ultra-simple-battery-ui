@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Ultra Simple Battery UI - Phase 2
+Ultra Simple Battery UI - Phase 3 (完成版)
 最もシンプルで安全なバッテリー制御UI
 
-Phase 2: バッテリー表示 + 充電制御ボタン
+Phase 3: バッテリー表示 + 充電制御ボタン + 自動制御ボタン
 """
 
 import tkinter as tk
@@ -23,6 +23,7 @@ class UltraSimpleBatteryUI:
         # 状態管理 - 最小限
         self.battery_level = 0
         self.is_charging = False
+        self.auto_mode = True  # 自動制御をONにする（重要なバグ修正）
         
         # バッテリー制御器初期化
         self.controller = BatteryChargeController()
@@ -33,20 +34,23 @@ class UltraSimpleBatteryUI:
         # 初回バッテリー情報取得
         self.update_battery_display()
         
+        # 定期更新開始
+        self.start_periodic_update()
+        
     def setup_window(self):
         """ウィンドウの基本設定"""
         self.root.title("🔋 Battery Control")
-        self.root.geometry("300x200")
+        self.root.geometry("300x250")
         self.root.resizable(False, False)  # サイズ固定でレイアウト問題回避
         
         # 画面中央配置
         self.root.update_idletasks()
         x = (self.root.winfo_screenwidth() // 2) - 150
-        y = (self.root.winfo_screenheight() // 2) - 100
-        self.root.geometry(f"300x200+{x}+{y}")
+        y = (self.root.winfo_screenheight() // 2) - 125
+        self.root.geometry(f"300x250+{x}+{y}")
         
     def create_ui(self):
-        """UI要素作成 - Phase 2: バッテリー表示 + 充電制御ボタン"""
+        """UI要素作成 - Phase 3: バッテリー表示 + 充電制御ボタン + 自動制御ボタン"""
         # メインフレーム
         main_frame = tk.Frame(self.root, padx=20, pady=20)
         main_frame.pack(fill='both', expand=True)
@@ -69,12 +73,24 @@ class UltraSimpleBatteryUI:
             width=15,
             height=1
         )
-        self.charge_button.pack(pady=10)
+        self.charge_button.pack(pady=5)
+        
+        # 自動制御ボタン
+        self.auto_button = tk.Button(
+            main_frame,
+            text="🤖 自動制御: ON",
+            font=('Arial', 10),
+            command=self.toggle_auto_mode,
+            width=15,
+            height=1,
+            bg='lightgreen'
+        )
+        self.auto_button.pack(pady=5)
         
         # デバッグ情報表示（開発時のみ）
         self.debug_label = tk.Label(
             main_frame,
-            text="Phase 2: Display + Control",
+            text="Phase 3: Complete",
             font=('Arial', 10),
             fg='gray'
         )
@@ -133,6 +149,9 @@ class UltraSimpleBatteryUI:
                     self.charge_button.config(text="🔌 充電を停止")
                 else:
                     self.charge_button.config(text="🔌 充電を開始")
+                
+                # 自動制御実行
+                self.check_auto_control()
             else:
                 # エラー時の表示
                 self.battery_label.config(text="🔋 Battery: Error", fg='gray')
@@ -178,12 +197,50 @@ class UltraSimpleBatteryUI:
             print("🔌 充電を停止しました")
         except Exception as e:
             print(f"Stop charging error: {e}")
+    
+    def toggle_auto_mode(self):
+        """自動制御モードの切り替え"""
+        try:
+            self.auto_mode = not self.auto_mode
+            if self.auto_mode:
+                self.auto_button.config(text="🤖 自動制御: ON", bg='lightgreen')
+                print("🤖 自動制御を有効にしました")
+            else:
+                self.auto_button.config(text="🤖 自動制御: OFF", bg='lightcoral')
+                print("🤖 自動制御を無効にしました")
+        except Exception as e:
+            print(f"Toggle auto mode error: {e}")
+    
+    def check_auto_control(self):
+        """自動制御チェック（78%で停止、30%で開始）"""
+        if not self.auto_mode:
+            return
+            
+        try:
+            # 充電停止条件: 78%以上で充電中
+            if self.battery_level >= 78 and self.is_charging:
+                print(f"🤖 自動制御: バッテリー{self.battery_level}%で充電停止")
+                self.stop_charging()
+                
+            # 充電開始条件: 30%以下で放電中
+            elif self.battery_level <= 30 and not self.is_charging:
+                print(f"🤖 自動制御: バッテリー{self.battery_level}%で充電開始")
+                self.start_charging()
+                
+        except Exception as e:
+            print(f"Auto control error: {e}")
+    
+    def start_periodic_update(self):
+        """定期更新開始（10秒間隔）"""
+        self.update_battery_display()
+        # 10秒後に再実行
+        self.root.after(10000, self.start_periodic_update)
             
     def run(self):
         """アプリケーション実行"""
         try:
-            print("🔋 Ultra Simple Battery UI - Phase 2 起動")
-            print("Phase 2: バッテリー表示 + 充電制御ボタン")
+            print("🔋 Ultra Simple Battery UI - Phase 3 起動（完成版）")
+            print("Phase 3: バッテリー表示 + 充電制御ボタン + 自動制御ボタン")
             
             # 終了処理設定
             self.root.protocol("WM_DELETE_WINDOW", self.on_closing)

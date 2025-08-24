@@ -34,6 +34,9 @@ class UltraSimpleBatteryUI:
         # 初回バッテリー情報取得
         self.update_battery_display()
         
+        # 🚨 緊急修正: Tapoデバイス初期化
+        self.initialize_tapo_device()
+        
         # 定期更新開始
         self.start_periodic_update()
         
@@ -229,6 +232,23 @@ class UltraSimpleBatteryUI:
                 
         except Exception as e:
             print(f"Auto control error: {e}")
+    
+    def initialize_tapo_device(self):
+        """🚨 緊急修正: Tapoデバイス初期化"""
+        try:
+            from config import TAPO_SETTINGS
+            
+            # 認証情報設定
+            self.controller.tapo_username = TAPO_SETTINGS['username']
+            self.controller.tapo_password = TAPO_SETTINGS['password'] 
+            self.controller.device_ip = TAPO_SETTINGS['device_ip']
+            
+            # 非同期初期化を同期的に実行
+            asyncio.run(self.controller.init_tapo_device())
+            print("🔌 Tapo P110M初期化完了")
+            
+        except Exception as e:
+            print(f"🚨 Tapo初期化エラー: {e}")
     
     def start_periodic_update(self):
         """定期更新開始（10秒間隔）"""

@@ -251,10 +251,10 @@ class UltraSimpleBatteryUI:
             print(f"🚨 Tapo初期化エラー: {e}")
     
     def start_periodic_update(self):
-        """定期更新開始（10秒間隔）"""
+        """定期更新開始（120秒間隔）"""
         self.update_battery_display()
-        # 10秒後に再実行
-        self.root.after(10000, self.start_periodic_update)
+        # 120秒後に再実行
+        self.root.after(120000, self.start_periodic_update)
             
     def run(self):
         """アプリケーション実行"""

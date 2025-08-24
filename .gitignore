@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.pid
+
+# Sensitive data
+config.py.backup
+secure_config.enc
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Application specific
+production_battery_control.log
+production_battery_control.pid
+secure_battery_control.log
+secure_battery_control.pid
+security.log

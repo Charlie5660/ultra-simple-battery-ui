@@ -25,6 +25,9 @@ class UltraSimpleBatteryUI:
         self.is_charging = False
         self.auto_mode = True  # 自動制御をONにする（重要なバグ修正）
         
+        # 🛡️ 定期更新タイマー管理（重複防止）
+        self.update_timer_id = None
+        
         # バッテリー制御器初期化
         self.controller = BatteryChargeController()
         
@@ -116,8 +119,14 @@ class UltraSimpleBatteryUI:
             if match:
                 self.battery_level = int(match.group(1))
                 
-                # 充電状態確認
-                self.is_charging = 'charging' in output or 'ac power' in output
+                # 充電状態確認（完全修正版）
+                # 実際に'charging'状態かつ'AC Power'からの給電の場合のみ充電中と判定
+                is_ac_power = 'now drawing from \'ac power\'' in output
+                is_charging_status = 'charging' in output
+                self.is_charging = is_ac_power and is_charging_status
+                
+                # デバッグログ追加
+                print(f"🔍 Battery Debug: {self.battery_level}%, AC Power: {is_ac_power}, Charging: {is_charging_status}, Final: {self.is_charging}")
                 
                 return True
             else:
@@ -204,15 +213,27 @@ class UltraSimpleBatteryUI:
     def toggle_auto_mode(self):
         """自動制御モードの切り替え"""
         try:
+            # 🛡️ ボタン一時無効化（重複クリック防止）
+            self.auto_button.config(state='disabled')
+            
             self.auto_mode = not self.auto_mode
             if self.auto_mode:
                 self.auto_button.config(text="🤖 自動制御: ON", bg='lightgreen')
                 print("🤖 自動制御を有効にしました")
+                # 🛡️ 自動制御ON時は即座にチェック実行
+                self.root.after(1000, self.check_auto_control)
             else:
                 self.auto_button.config(text="🤖 自動制御: OFF", bg='lightcoral')
                 print("🤖 自動制御を無効にしました")
+            
+            # 🛡️ 定期更新タイマーをリセット（安全のため）
+            self.start_periodic_update()
+            
         except Exception as e:
             print(f"Toggle auto mode error: {e}")
+        finally:
+            # ボタン再有効化
+            self.auto_button.config(state='normal')
     
     def check_auto_control(self):
         """自動制御チェック（78%で停止、30%で開始）"""
@@ -251,10 +272,46 @@ class UltraSimpleBatteryUI:
             print(f"🚨 Tapo初期化エラー: {e}")
     
     def start_periodic_update(self):
-        """定期更新開始（120秒間隔）"""
+        """定期更新開始（120秒間隔）+ 健全性チェック"""
+        # 🛡️ 既存のタイマーをキャンセル（重複防止）
+        if self.update_timer_id is not None:
+            self.root.after_cancel(self.update_timer_id)
+            self.update_timer_id = None
+        
+        # バッテリー情報更新
         self.update_battery_display()
-        # 120秒後に再実行
-        self.root.after(120000, self.start_periodic_update)
+        
+        # 🛡️ 健全性チェック機能追加
+        self.health_check()
+        
+        # 120秒後に再実行（タイマーID保存）
+        self.update_timer_id = self.root.after(120000, self.start_periodic_update)
+        print(f"🛡️ Periodic Update: Timer set (ID: {self.update_timer_id})")
+    
+    def health_check(self):
+        """🛡️ プロセス健全性チェック"""
+        try:
+            import os
+            import time
+            
+            # 現在時刻をログ
+            current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+            
+            # PIDファイル更新（生存確認用）
+            pid_file = os.path.expanduser("~/.battery_ui_health.pid")
+            with open(pid_file, 'w') as f:
+                f.write(f"{os.getpid()}:{current_time}\n")
+            
+            # 自動制御の動作確認
+            if self.auto_mode and self.battery_level <= 30 and not self.is_charging:
+                print(f"🛡️ Health Check: Battery {self.battery_level}% - Auto charging should activate")
+            elif self.auto_mode and self.battery_level >= 78 and self.is_charging:
+                print(f"🛡️ Health Check: Battery {self.battery_level}% - Auto charging should stop")
+            
+            print(f"🛡️ Health Check: {current_time} - System OK")
+            
+        except Exception as e:
+            print(f"🚨 Health Check Error: {e}")
             
     def run(self):
         """アプリケーション実行"""

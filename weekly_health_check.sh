@@ -21,7 +21,7 @@ if [ ! -z "$UI_PID" ]; then
     echo "Ultra Simple UI: Running (PID: $UI_PID, Elapsed: $ELAPSED, CPU: $CPU%, MEM: $MEM%)" >> $LOG_FILE
 else
     echo "Ultra Simple UI: NOT RUNNING - RESTARTING..." >> $LOG_FILE
-    cd /Users/yamakawadaiki/battery_charge_app
+    cd /Users/$(whoami)/battery_charge_app
     python3 ultra_simple_ui.py &
     echo "Ultra Simple UI: Restarted" >> $LOG_FILE
 fi
@@ -59,9 +59,9 @@ fi
 
 # 9. 設定ファイルバックアップ
 echo "--- Configuration Backup ---" >> $LOG_FILE
-if [ -f /Users/yamakawadaiki/battery_charge_app/config.py ]; then
-    BACKUP_FILE="/Users/yamakawadaiki/battery_charge_app/config.py.backup.$(date +%Y%m%d)"
-    cp /Users/yamakawadaiki/battery_charge_app/config.py "$BACKUP_FILE"
+if [ -f /Users/$(whoami)/battery_charge_app/config.py ]; then
+    BACKUP_FILE="/Users/$(whoami)/battery_charge_app/config.py.backup.$(date +%Y%m%d)"
+    cp /Users/$(whoami)/battery_charge_app/config.py "$BACKUP_FILE"
     echo "Config backup created: $BACKUP_FILE" >> $LOG_FILE
 fi
 

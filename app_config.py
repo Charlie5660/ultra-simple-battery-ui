@@ -2,9 +2,9 @@
 # 以下の値を実際の情報に変更してから使用してください
 
 TAPO_SETTINGS = {
-    "username": "ferrari.2020.ty@gmail.com",                    # Tapoアカウントのメールアドレス
-    "password": "ty5622Tp",                    # Tapoアカウントのパスワード  
-    "device_ip": "192.168.0.220",                   # Tapo P110MのIPアドレス (例: "192.168.0.220")
+    "username": "",                    # Tapoアカウントのメールアドレス
+    "password": "",                    # Tapoアカウントのパスワード  
+    "device_ip": "",                   # Tapo P110MのIPアドレス (例: "192.168.0.220")
 }
 
 CHARGE_SETTINGS = {
@@ -19,7 +19,7 @@ OTHER_SETTINGS = {
 }
 
 # 暗号化パスワード（8文字以上の強力なパスワードを設定）
-ENCRYPTION_PASSWORD = "ty5622Mj@24"
+ENCRYPTION_PASSWORD = ""
 
 # 使用方法:
 # 1. TAPO_SETTINGSの値を実際のTapo認証情報に変更

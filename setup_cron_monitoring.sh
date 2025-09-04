@@ -11,20 +11,20 @@ crontab -l 2>/dev/null || echo "cronジョブは設定されていません"
 echo ""
 echo "推奨するcronジョブ設定："
 echo "# バッテリーヘルスチェック（30分毎）"
-echo "*/30 * * * * /Users/yamakawadaiki/battery_charge_app/battery_health_monitor.sh"
+echo "*/30 * * * * /Users/$(whoami)/battery_charge_app/battery_health_monitor.sh"
 echo ""
 echo "# 週1回の完全システムヘルスチェック（日曜日 午前9時）"
-echo "0 9 * * 0 /Users/yamakawadaiki/battery_charge_app/weekly_health_check.sh"
+echo "0 9 * * 0 /Users/$(whoami)/battery_charge_app/weekly_health_check.sh"
 
 # cron設定ファイル作成
 CRON_FILE="/tmp/battery_cron"
 cat > $CRON_FILE << 'EOF'
 # Battery Management System - Automated Monitoring
 # 30分毎のヘルスチェック
-*/30 * * * * /Users/yamakawadaiki/battery_charge_app/battery_health_monitor.sh
+*/30 * * * * /Users/$(whoami)/battery_charge_app/battery_health_monitor.sh
 
 # 週1回の完全チェック
-0 9 * * 0 /Users/yamakawadaiki/battery_charge_app/weekly_health_check.sh
+0 9 * * 0 /Users/$(whoami)/battery_charge_app/weekly_health_check.sh
 EOF
 
 echo ""

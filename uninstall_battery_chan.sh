@@ -23,7 +23,7 @@ if [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]; then
     read -p "設定ファイルも削除しますか？ (y/N): " delete_config
     
     if [[ $delete_config == [yY] || $delete_config == [yY][eE][sS] ]]; then
-        cd "/Users/yamakawadaiki/battery_charge_app"
+        cd "/Users/$(whoami)/battery_charge_app"
         rm -f secure_config.enc .salt *.log
         echo "✅ 設定ファイルを削除しました"
     fi

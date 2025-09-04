@@ -11,9 +11,9 @@ import subprocess
 import re
 import asyncio
 from datetime import datetime
-from battery_charge_controller import BatteryChargeController
+from battery_controller_core import BatteryChargeController
 
-class UltraSimpleBatteryUI:
+class BatteryManagerApp:
     def __init__(self):
         """初期化 - 最小限の設定"""
         # 基本ウィンドウ作成
@@ -45,7 +45,7 @@ class UltraSimpleBatteryUI:
         
     def setup_window(self):
         """ウィンドウの基本設定"""
-        self.root.title("🔋 Battery Control")
+        self.root.title("🔋 Battery Manager")
         self.root.geometry("300x250")
         self.root.resizable(False, False)  # サイズ固定でレイアウト問題回避
         
@@ -93,14 +93,16 @@ class UltraSimpleBatteryUI:
         )
         self.auto_button.pack(pady=5)
         
-        # デバッグ情報表示（開発時のみ）
-        self.debug_label = tk.Label(
+        # 設定ボタン追加
+        self.settings_button = tk.Button(
             main_frame,
-            text="Phase 3: Complete",
+            text="⚙️ 設定",
             font=('Arial', 10),
-            fg='gray'
+            command=self.open_settings,
+            width=15,
+            height=1
         )
-        self.debug_label.pack(pady=5)
+        self.settings_button.pack(pady=5)
         
     def get_battery_info(self):
         """バッテリー情報取得 - エラーハンドリング強化"""
@@ -257,7 +259,7 @@ class UltraSimpleBatteryUI:
     def initialize_tapo_device(self):
         """🚨 緊急修正: Tapoデバイス初期化"""
         try:
-            from config import TAPO_SETTINGS
+            from app_config import TAPO_SETTINGS
             
             # 認証情報設定
             self.controller.tapo_username = TAPO_SETTINGS['username']
@@ -312,12 +314,75 @@ class UltraSimpleBatteryUI:
             
         except Exception as e:
             print(f"🚨 Health Check Error: {e}")
+    
+    def open_settings(self):
+        """設定画面を開く"""
+        try:
+            settings_window = tk.Toplevel(self.root)
+            settings_window.title("⚙️ 設定")
+            settings_window.geometry("400x300")
+            settings_window.resizable(False, False)
+            
+            # 画面中央配置
+            settings_window.update_idletasks()
+            x = (settings_window.winfo_screenwidth() // 2) - 200
+            y = (settings_window.winfo_screenheight() // 2) - 150
+            settings_window.geometry(f"400x300+{x}+{y}")
+            
+            # 設定フレーム
+            main_frame = tk.Frame(settings_window, padx=20, pady=20)
+            main_frame.pack(fill='both', expand=True)
+            
+            # Tapo設定
+            tapo_frame = tk.LabelFrame(main_frame, text="🔌 Tapo P110M設定", 
+                                      font=('Arial', 12, 'bold'), padx=10, pady=10)
+            tapo_frame.pack(fill='x', pady=10)
+            
+            tk.Label(tapo_frame, text="デバイスIP:", font=('Arial', 10)).grid(row=0, column=0, sticky='w')
+            ip_entry = tk.Entry(tapo_frame, width=20)
+            ip_entry.grid(row=0, column=1, padx=5)
+            ip_entry.insert(0, "192.168.0.220")
+            
+            # バッテリー設定
+            battery_frame = tk.LabelFrame(main_frame, text="⚡ 充電制御設定",
+                                         font=('Arial', 12, 'bold'), padx=10, pady=10)
+            battery_frame.pack(fill='x', pady=10)
+            
+            tk.Label(battery_frame, text="充電開始:", font=('Arial', 10)).grid(row=0, column=0, sticky='w')
+            start_var = tk.IntVar(value=30)
+            start_scale = tk.Scale(battery_frame, from_=10, to=50, orient='horizontal',
+                                  variable=start_var, length=150)
+            start_scale.grid(row=0, column=1, padx=5)
+            tk.Label(battery_frame, text="% 以下", font=('Arial', 10)).grid(row=0, column=2, sticky='w')
+            
+            tk.Label(battery_frame, text="充電停止:", font=('Arial', 10)).grid(row=1, column=0, sticky='w')
+            stop_var = tk.IntVar(value=78)
+            stop_scale = tk.Scale(battery_frame, from_=60, to=95, orient='horizontal',
+                                 variable=stop_var, length=150)
+            stop_scale.grid(row=1, column=1, padx=5)
+            tk.Label(battery_frame, text="% 以上", font=('Arial', 10)).grid(row=1, column=2, sticky='w')
+            
+            # 保存・キャンセルボタン
+            button_frame = tk.Frame(main_frame)
+            button_frame.pack(fill='x', pady=20)
+            
+            save_button = tk.Button(button_frame, text="保存", 
+                                   bg='#4CAF50', fg='white', font=('Arial', 11))
+            save_button.pack(side='right', padx=5)
+            
+            cancel_button = tk.Button(button_frame, text="キャンセル",
+                                     command=settings_window.destroy,
+                                     font=('Arial', 11))
+            cancel_button.pack(side='right', padx=5)
+            
+        except Exception as e:
+            print(f"Settings window error: {e}")
             
     def run(self):
         """アプリケーション実行"""
         try:
-            print("🔋 Ultra Simple Battery UI - Phase 3 起動（完成版）")
-            print("Phase 3: バッテリー表示 + 充電制御ボタン + 自動制御ボタン")
+            print("🔋 Battery Manager - 商用版起動")
+            print("スマート充電制御システム")
             
             # 終了処理設定
             self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -330,14 +395,14 @@ class UltraSimpleBatteryUI:
             
     def on_closing(self):
         """終了処理"""
-        print("🔋 Ultra Simple Battery UI 終了")
+        print("🔋 Battery Manager 終了")
         self.root.quit()
         self.root.destroy()
 
 def main():
     """メイン関数"""
     try:
-        app = UltraSimpleBatteryUI()
+        app = BatteryManagerApp()
         app.run()
     except Exception as e:
         print(f"Main error: {e}")

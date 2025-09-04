@@ -30,7 +30,7 @@ if [ ! -z "$UI_PID" ]; then
             sleep 3
             
             # 新しいプロセス開始
-            cd /Users/yamakawadaiki/battery_charge_app
+            cd /Users/$(whoami)/battery_charge_app
             python3 ultra_simple_ui.py &
             NEW_PID=$!
             echo $NEW_PID > $PID_FILE
@@ -48,7 +48,7 @@ if [ ! -z "$UI_PID" ]; then
             sleep 3
             
             # 新しいプロセス開始
-            cd /Users/yamakawadaiki/battery_charge_app
+            cd /Users/$(whoami)/battery_charge_app
             python3 ultra_simple_ui.py &
             NEW_PID=$!
             echo $NEW_PID > $PID_FILE
@@ -60,7 +60,7 @@ else
     echo "[$DATE] ACTION: Starting Ultra Simple UI" >> $LOG_FILE
     
     # Ultra Simple UI 開始
-    cd /Users/yamakawadaiki/battery_charge_app
+    cd /Users/$(whoami)/battery_charge_app
     python3 ultra_simple_ui.py &
     NEW_PID=$!
     echo $NEW_PID > $PID_FILE
